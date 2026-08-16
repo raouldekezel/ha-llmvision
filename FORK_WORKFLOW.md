@@ -1,6 +1,6 @@
 # Fork Workflow
 
-This repository is a personal fork of [valentinfrlch/ha-llmvision](https://github.com/valentinfrlch/ha-llmvision). It exists to carry local fixes and improvements that are not (or not yet) addressed upstream, while staying easy to resynchronize with upstream.
+This repository is a personal fork of [valentinfrlch/ha-llmvision](https://github.com/valentinfrlch/ha-llmvision). It exists to carry local fixes and improvements that are not (or not yet) addressed upstream, while staying easy to resynchronize with upstream. The companion card fork is [raouldekezel/llmvision-card](https://github.com/raouldekezel/llmvision-card), run under the same workflow.
 
 ## Branch model
 
@@ -13,11 +13,34 @@ Rationale: keeping `main` strictly identical to upstream makes synchronization t
 
 Making `deploy` the repository's default branch is recommended: new pull requests then target it by default (instead of GitHub proposing the upstream repository as base), and HACS — which installs from the default branch when a fork has no releases — picks up the deployed version directly.
 
-## Day-to-day work
+## Development process
 
-1. Create a feature branch from `deploy` (e.g. `fix/timeline-ordering`).
-2. Open a pull request targeting `deploy` **in this fork**. Double-check the base repository and branch when opening the PR: GitHub tends to preselect the upstream repository.
-3. Review and iterate; merge only on the owner's explicit approval ("ok merge").
+The process is the one proven on [NavimowHA](https://github.com/raouldekezel/NavimowHA) and [dolphin-robot](https://github.com/raouldekezel/dolphin-robot).
+
+### Issues
+
+- **Every change starts as an issue**, systematically — bug fix, feature, hardening, chore or investigation alike. Issues carry a typed identifier in the title, numbered per family and local to this repository: `BUG-NN`, `HARD-NN`, `FEAT-NN`, `CHORE-NN`, `SPIKE-NN`.
+- **The issue body is the normative source of truth.** Settled design, root cause, discarded alternatives and arbitrated decisions are folded into the body *in place*, with a dated edit trailer. Comments carry only dated session reports and reviews — never normative additions stacked over an outdated body.
+- **An issue is closed only by the operator, and only after on-site validation** on the live Home Assistant instance. A merge never closes an issue. If validation fails or reveals a new pathology, the issue reopens or a new `BUG` is filed (the BUG-17 → BUG-19 chain on NavimowHA is the canonical example).
+
+### Branches, pull requests, merges
+
+- Work branches are named `patches/<id>-<slug>` (e.g. `patches/bug-01-timeline-ordering`) and fork off `deploy`.
+- One pull request per issue, targeting `deploy` **in this fork**. Double-check the base repository and branch when opening the PR: GitHub tends to preselect the upstream repository.
+- Reference issues with `refs #NN` — never `Closes`, since closing is an operator act tied to on-site validation, not to a merge.
+- Review verdicts are posted as PR comments. Merge happens only on the operator's explicit "ok merge".
+- Deployed states are tracked with `raoul.NN` tags; a release bundles one or two issues, validated on site before their issues close.
+
+### Diagnostics
+
+Field evidence is captured in **diag sessions** under `docs/diag/YYYY-MM-DD_<id>_<topic>/`, each delivered as its own docs-only PR. Structure, evidence formats, PII redaction rules and the drift-proof index are specified in [docs/diag/README.md](docs/diag/README.md) and enforced by `scripts/check_diag_index.py` via the **Check diag index** workflow. Sessions are immutable once merged; later sessions supersede rather than rewrite.
+
+### Tests
+
+- The pytest suite (upstream `tests.yaml`) is the PR gate; the suite count is tracked from review to review.
+- **Tests are black-box**: they exercise public behavior and never read internal fields or implementation details (white-box reads are out of scope by rule).
+- Regression tests are pinned and named after their issue id. Pinned assertions are never edited or weakened without an explicit, reviewed justification — a pin whose behavior inverts by design is rewritten, with the inversion argued in the PR.
+- A test built on mocked scheduling must prove that the asserted path actually executed; a green that never ran the path is a defect, not a pass.
 
 ## Syncing with upstream
 
@@ -36,9 +59,10 @@ GitHub disables Actions by default on newly created forks; they must be enabled 
 - `tests.yaml` — unit tests with coverage; this is the meaningful signal for local PRs.
 - `validate.yaml` — Hassfest validation plus HACS validation. The HACS jobs check repository metadata (description, topics, issues enabled) that forks do not inherit from upstream.
 - `stale.yml` — scheduled issue housekeeping; scheduled workflows are disabled on forks by default, and this one is irrelevant to a personal fork.
+- `check-diag-index.yaml` — the one fork-owned addition (on `deploy`), path-filtered to `docs/diag/**`; enforces the diag index and never touches upstream-inherited files.
 
-Policy on this fork: workflow files are deliberately kept identical to upstream (no local edits) so that syncing never conflicts on them. Instead, the repository metadata the HACS jobs depend on is maintained manually in the repository settings — issues enabled, upstream topics copied — so those jobs stay green.
+Policy on this fork: workflow files inherited from upstream are deliberately kept identical to upstream (no local edits) so that syncing never conflicts on them. Instead, the repository metadata the HACS jobs depend on is maintained manually in the repository settings — issues enabled, upstream topics copied — so those jobs stay green.
 
 ## Note on this file
 
-`FORK_WORKFLOW.md` exists only on `deploy` (and branches derived from it), keeping `main` byte-identical to upstream.
+`FORK_WORKFLOW.md`, the diag scaffolding and this process section exist only on `deploy` (and branches derived from it), keeping `main` byte-identical to upstream.
