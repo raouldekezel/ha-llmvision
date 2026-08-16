@@ -11,11 +11,13 @@ This repository is a personal fork of [valentinfrlch/ha-llmvision](https://githu
 
 Rationale: keeping `main` strictly identical to upstream makes synchronization trivial (fast-forward only, no conflicts on `main` itself) and provides a clean base both for comparing local changes (`main...deploy`) and for preparing upstream contributions.
 
-Making `deploy` the repository's default branch is recommended: new pull requests then target it by default (instead of GitHub proposing the upstream repository as base), and HACS — which installs from the default branch when a fork has no releases — picks up the deployed version directly.
+`deploy` is the repository's default branch for pull-request ergonomics: new PRs target it by default, instead of GitHub proposing the upstream repository as base. The default branch is irrelevant to how HACS installs this fork — see **Distribution (HACS)** below: once releases exist, HACS prefers them over any branch.
 
 ## Development process
 
 The process is the one proven on [NavimowHA](https://github.com/raouldekezel/NavimowHA) and [dolphin-robot](https://github.com/raouldekezel/dolphin-robot).
+
+**Language policy:** all repository communication — issues, pull requests, commit messages, and documentation — is written in English.
 
 ### Issues
 
@@ -27,9 +29,9 @@ The process is the one proven on [NavimowHA](https://github.com/raouldekezel/Nav
 
 - Work branches are named `patches/<id>-<slug>` (e.g. `patches/bug-01-timeline-ordering`) and fork off `deploy`.
 - One pull request per issue, targeting `deploy` **in this fork**. Double-check the base repository and branch when opening the PR: GitHub tends to preselect the upstream repository.
-- Reference issues with `refs #NN` — never `Closes`, since closing is an operator act tied to on-site validation, not to a merge.
+- Reference issues with `refs #NN` — never `Closes`: closing is an operator act tied to on-site validation, and with `deploy` as the default branch a merged closing keyword would actually auto-close the issue, so the guard is functional, not stylistic.
 - Review verdicts are posted as PR comments. Merge happens only on the operator's explicit "ok merge". Work PRs are **squash-merged** — squash is the only merge method enabled on this repository.
-- Deployed states are tracked with `raoul.NN` tags; a release bundles one or two issues, validated on site before their issues close.
+- Each deployed, on-site-validated state is published as a **GitHub pre-release** tagged `v<upstream-version>-raoul.N`, with generated notes; a release bundles one or two issues, validated on site before their issues close. See **Distribution (HACS)** below.
 
 ### Diagnostics
 
@@ -41,6 +43,21 @@ Field evidence is captured in **diag sessions** under `docs/diag/YYYY-MM-DD_<id>
 - **Tests are black-box**: they exercise public behavior and never read internal fields or implementation details (white-box reads are out of scope by rule).
 - Regression tests are pinned and named after their issue id. Pinned assertions are never edited or weakened without an explicit, reviewed justification — a pin whose behavior inverts by design is rewritten, with the inversion argued in the PR.
 - A test built on mocked scheduling must prove that the asserted path actually executed; a green that never ran the path is a defect, not a pass.
+
+## Distribution (HACS)
+
+HACS reads `/releases`, not `/tags`: a bare git tag is invisible to it and carries no changelog. This fork is therefore distributed as **GitHub pre-releases**:
+
+- Tag grammar: `v<upstream-version>-raoul.N` — base = the upstream version `deploy` currently tracks (see `custom_components/llmvision/manifest.json`), `N` monotonic per upstream base. The `-raoul.N` semver segment marks the release as a pre-release, so HACS must have **"show beta versions"** enabled for this repository.
+- Publication: `git push origin <tag>` then `gh release create v<base>-raoul.N --prerelease --generate-notes --target deploy`. `hacs.json` sets no `zip_release`, so HACS downloads the tagged tree directly — no artifact to attach.
+- `manifest.json` keeps the **upstream** version (operator-arbitrated): no per-release bump, which would permanently diverge a file upstream touches at every release. HACS shows `<base>-raoul.N` (from the tag); the HA integration page shows the upstream base.
+- Cut-over note: publishing the **first** release flips HACS from tracking `deploy` HEAD to installing releases only. Intended (pinning) — cut releases from a validated `deploy` only.
+
+## Day-to-day work
+
+1. Create a feature branch from `deploy` (e.g. `patches/bug-01-timeline-ordering`).
+2. Open a pull request targeting `deploy` **in this fork**. Double-check the base repository and branch when opening the PR: GitHub tends to preselect the upstream repository.
+3. Review and iterate; merge only on the owner's explicit approval ("ok merge").
 
 ## Syncing with upstream
 
