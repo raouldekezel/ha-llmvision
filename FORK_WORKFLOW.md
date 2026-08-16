@@ -28,7 +28,7 @@ The process is the one proven on [NavimowHA](https://github.com/raouldekezel/Nav
 - Work branches are named `patches/<id>-<slug>` (e.g. `patches/bug-01-timeline-ordering`) and fork off `deploy`.
 - One pull request per issue, targeting `deploy` **in this fork**. Double-check the base repository and branch when opening the PR: GitHub tends to preselect the upstream repository.
 - Reference issues with `refs #NN` — never `Closes`, since closing is an operator act tied to on-site validation, not to a merge.
-- Review verdicts are posted as PR comments. Merge happens only on the operator's explicit "ok merge".
+- Review verdicts are posted as PR comments. Merge happens only on the operator's explicit "ok merge". Work PRs are **squash-merged** — squash is the only merge method enabled on this repository.
 - Deployed states are tracked with `raoul.NN` tags; a release bundles one or two issues, validated on site before their issues close.
 
 ### Diagnostics
@@ -45,7 +45,15 @@ Field evidence is captured in **diag sessions** under `docs/diag/YYYY-MM-DD_<id>
 ## Syncing with upstream
 
 1. Update `main` from upstream: use the **Sync fork** button while on the `main` branch page, or `gh repo sync raouldekezel/ha-llmvision -b main`.
-2. Merge `main` into `deploy` (via a PR from `main` to `deploy`, or a local merge pushed to `deploy`).
+2. Merge `main` into `deploy` **as a local merge pushed directly to `deploy`** — never through a pull request. Squash is the only PR merge method enabled here, and squashing a sync PR would collapse the upstream commits into a single synthetic commit: `deploy` would no longer contain upstream's commit objects, and every subsequent sync would re-conflict on history already integrated. A true merge commit pushed by hand is unaffected — the merge-method restriction only governs the PR merge buttons.
+
+   ```
+   git fetch origin
+   git checkout deploy
+   git merge origin/main
+   git push origin deploy
+   ```
+
 3. During the merge, resolve conflicts in favor of preserving local changes — unless upstream has properly fixed the underlying issue, in which case drop the now-redundant local patch instead of keeping both variants.
 
 ## Contributing back upstream
