@@ -83,9 +83,14 @@ CASES = [
     ("दरवाज़े पर आदमी खड़ा है। कुत्ता भौंक रहा है।", "दरवाज़े पर आदमी खड़ा है"),
     # Arabic ؟ kept (like "?"), no cut below the Latin MIN_CUT.
     ("من بالباب؟ الكلب ينبح.", "من بالباب؟ الكلب ينبح"),
-    # CJK title label + full-width colon, and CJK title brackets.
+    # Title label across the alternation: CJK + full-width colon, JP + full-width
+    # colon, AR + ASCII colon (RTL); and CJK title brackets.
     ("标题：门口的人", "门口的人"),
+    ("タイトル：玄関に人", "玄関に人"),
+    ("العنوان: رجل عند الباب", "رجل عند الباب"),
     ("《门口的人》", "门口的人"),
+    # Arabic ؟ actually cuts when past the Latin belt, and stays (expressive).
+    ("هل يوجد شخص عند الباب؟ الكلب ينبح.", "هل يوجد شخص عند الباب؟"),
 ]
 
 
