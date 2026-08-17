@@ -12,7 +12,7 @@ either drives a fix/feature design or validates it.
 
 | Date | Issue | Question | Answer (TL;DR) | Link |
 | ---- | ----- | -------- | -------------- | ---- |
-| _none yet_ | | | | |
+| 2026-08-16 | [BUG-01](https://github.com/raouldekezel/ha-llmvision/issues/2) | Does the title sanitizer strip apostrophes from a real French title on the live instance, while the description keeps them? | Yes — Gemini title `Homme vu à l'allée` is stored as `Homme vu à lallée` (apostrophe gone) 5 ms after the provider response, while the same event's description keeps `d'un`/`l'allée`. Confirms BUG-01 end-to-end at `providers.py:286`. | [2026-08-16_bug-01_run-event-summary-title-strip](2026-08-16_bug-01_run-event-summary-title-strip/findings.md) |
 
 ## Layout
 
