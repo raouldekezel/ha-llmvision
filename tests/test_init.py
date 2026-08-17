@@ -470,6 +470,37 @@ class TestCreateEventAndUpdateSensor:
         assert kwargs["title"] == "Motion detected"
 
     @pytest.mark.anyio
+    async def test_create_event_empty_title_falls_back_to_motion_detected(self):
+        hass = _make_hass()
+        settings = Mock()
+        settings.data = {"provider": "Settings"}
+        hass.config_entries.async_entries.return_value = [settings]
+
+        timeline = Mock()
+        timeline.create_event = AsyncMock()
+        call = _DummyCall(
+            store_in_timeline=True,
+            image_entities=["camera.front"],
+            response_format="json",
+            description_field="summary",
+        )
+        # normalize_title can return "" (decorations-only input); the
+        # _create_event seam owns empties via the "or" fallback.
+        response = {
+            "response_text": "fallback",
+            "structured_response": {"summary": "from json"},
+            "title": "",
+        }
+
+        with patch("custom_components.llmvision.Timeline", return_value=timeline):
+            await _create_event(
+                hass, call, datetime.datetime.now(), response, "frame.jpg"
+            )
+
+        timeline.create_event.assert_awaited_once()
+        assert timeline.create_event.await_args.kwargs["title"] == "Motion detected"
+
+    @pytest.mark.anyio
     async def test_update_sensor_boolean_and_number_and_text(self):
         hass = _make_hass()
         hass.states.get.return_value = SimpleNamespace(
