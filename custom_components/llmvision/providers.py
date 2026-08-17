@@ -87,37 +87,72 @@ _WRAP_PAIRS = (
     ("‹", "›"),  # ‹ ›
     ("「", "」"),  # 「 」
     ("『", "』"),  # 『 』
+    ("《", "》"),  # 《 》
+    ("〈", "〉"),  # 〈 〉
 )
 
-# Leading label the model sometimes prepends, e.g. "Title:", "Titre :".
+# Leading label the model sometimes prepends, e.g. "Title:", "Titre :", "标题：".
+# Closed set; the colon may be ASCII ":" or full-width "：".
 _LABEL_RE = re.compile(
-    r"^\s*(?:title|titre|título|titel|titolo)\s*:\s*", re.IGNORECASE
+    r"^\s*(?:title|titre|título|titel|titolo|标题|タイトル|제목|शीर्षक|العنوان)\s*[:：]\s*",
+    re.IGNORECASE,
 )
 
-# Full-width sentence terminators (CJK): a boundary on their own, no trailing
-# space required, and exempt from the minimum-cut guard below.
-_FULLWIDTH_ENDS = "。！？"  # 。！？
+# Full-width / danda sentence terminators (CJK, Hindi): a boundary on their own,
+# no trailing space required.
+_FULLWIDTH_ENDS = "。！？।"  # 。 ！ ？ danda ।
 
-# An ASCII "<.!?> " boundary is accepted only at or past this index, so Latin
-# abbreviations ("M. Dupont", "Mr. Smith") don't truncate the title. Newlines
-# and full-width terminators are exempt.
+# ASCII-style terminators need a following space; the Arabic question mark ؟ is
+# treated like "?" (space-suffixed, expressive — kept when trailing).
+_ASCII_ENDS = ".!?؟"
+
+# Dropped one at a time as a trailing sentence-final mark (step 5): "." / "。" /
+# danda "।". Never "…", "!", "?", "！", "？", "؟".
+_TRAILING_ENDS = ".。।"
+
+# An ASCII "<.!?؟> " boundary is accepted only at or past this index (the Latin
+# belt); a full-width/danda boundary only at or past _MIN_CUT_CJK (CJK/Hindi are
+# dense, so a short guard suffices). Newlines are always unconditional.
 _MIN_CUT = 12
+_MIN_CUT_CJK = 4
 
 
 def _first_sentence(text: str) -> str:
-    """Return the first sentence — the earliest accepted terminator wins.
+    """Return the first sentence — the earliest *accepted* terminator wins.
 
-    Newlines and full-width terminators always cut; an ASCII "<.!?> " boundary
-    only cuts at index >= _MIN_CUT. Runs before whitespace is collapsed so
-    newlines still delimit. The terminating mark stays in the slice (a trailing
-    "." is dropped later; "!"/"?" are expressive and kept).
+    Cut points, in scan order:
+      - newline: always cuts (never inside an abbreviation);
+      - full-width / danda ("。！？।"): cuts at index >= _MIN_CUT_CJK;
+      - ASCII "<.!?؟> " (needs a following space): cuts at index >= _MIN_CUT and
+        only when both hold — (a) for ".", the letter-run just before the dot is
+        >= 4 chars (guards "M.", "Mr.", "Sig.", "ul.", "č.", "م."), and (b') the
+        char after the space is neither a lowercase letter nor a digit (guards
+        "Bahnhofstr. 12", "3. emeleten"; caseless scripts still cut).
+
+    Runs before whitespace is collapsed so newlines still delimit. The
+    terminating mark stays in the slice; a trailing "."/"。"/"।" is dropped
+    later, while "!"/"?"/"؟"/"！"/"？" are expressive and kept.
     """
+    n = len(text)
     for i, ch in enumerate(text):
         if ch == "\n":
             return text[:i]
         if ch in _FULLWIDTH_ENDS:
-            return text[: i + 1]
-        if ch in ".!?" and i + 1 < len(text) and text[i + 1] == " " and i >= _MIN_CUT:
+            if i >= _MIN_CUT_CJK:
+                return text[: i + 1]
+            continue
+        if ch in _ASCII_ENDS and i + 1 < n and text[i + 1] == " ":
+            if i < _MIN_CUT or i + 2 >= n:
+                continue
+            follower = text[i + 2]
+            if follower.islower() or follower.isdigit():  # (b')
+                continue
+            if ch == ".":  # (a)
+                j = i
+                while j > 0 and text[j - 1].isalpha():
+                    j -= 1
+                if i - j < 4:
+                    continue
             return text[: i + 1]
     return text
 
@@ -158,9 +193,9 @@ def normalize_title(text: str) -> str:
     text = _first_sentence(text)
     text = re.sub(r"\s+", " ", text).strip()
 
-    # Drop one trailing "." or "。", but never an ellipsis ("…" / "...") and
-    # never "!"/"?"/"！"/"？".
-    if text and text[-1] in ".。" and not (len(text) >= 2 and text[-2] == "."):
+    # Drop one trailing "." / "。" / danda "।"; never an ellipsis ("…" / "...")
+    # and never "!"/"?"/"！"/"？"/"؟".
+    if text and text[-1] in _TRAILING_ENDS and not (len(text) >= 2 and text[-2] == "."):
         text = text[:-1]
 
     return text
