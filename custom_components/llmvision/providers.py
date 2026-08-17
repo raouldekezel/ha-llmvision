@@ -11,6 +11,7 @@ import inspect
 import re
 import json
 import base64
+import unicodedata
 from .const import (
     DOMAIN,
     CONF_API_KEY,
@@ -68,6 +69,101 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+# Symmetric wrapping pairs peeled from the edges of a generated title, longest
+# opener first so "**" wins over "*".
+_WRAP_PAIRS = (
+    ("**", "**"),
+    ("*", "*"),
+    ("_", "_"),
+    ("`", "`"),
+    ('"', '"'),
+    ("'", "'"),
+    ("“", "”"),  # “ ”
+    ("‘", "’"),  # ‘ ’
+    ("„", "“"),  # „ “
+    ("«", "»"),  # « »
+    ("‹", "›"),  # ‹ ›
+    ("「", "」"),  # 「 」
+    ("『", "』"),  # 『 』
+)
+
+# Leading label the model sometimes prepends, e.g. "Title:", "Titre :".
+_LABEL_RE = re.compile(
+    r"^\s*(?:title|titre|título|titel|titolo)\s*:\s*", re.IGNORECASE
+)
+
+# Full-width sentence terminators (CJK): a boundary on their own, no trailing
+# space required, and exempt from the minimum-cut guard below.
+_FULLWIDTH_ENDS = "。！？"  # 。！？
+
+# An ASCII "<.!?> " boundary is accepted only at or past this index, so Latin
+# abbreviations ("M. Dupont", "Mr. Smith") don't truncate the title. Newlines
+# and full-width terminators are exempt.
+_MIN_CUT = 12
+
+
+def _first_sentence(text: str) -> str:
+    """Return the first sentence — the earliest accepted terminator wins.
+
+    Newlines and full-width terminators always cut; an ASCII "<.!?> " boundary
+    only cuts at index >= _MIN_CUT. Runs before whitespace is collapsed so
+    newlines still delimit. The terminating mark stays in the slice (a trailing
+    "." is dropped later; "!"/"?" are expressive and kept).
+    """
+    for i, ch in enumerate(text):
+        if ch == "\n":
+            return text[:i]
+        if ch in _FULLWIDTH_ENDS:
+            return text[: i + 1]
+        if ch in ".!?" and i + 1 < len(text) and text[i + 1] == " " and i >= _MIN_CUT:
+            return text[: i + 1]
+    return text
+
+
+def normalize_title(text: str) -> str:
+    """Normalize a machine-generated title by structural shape only.
+
+    NFC-normalize; peel wrapping quotes/emphasis and a leading "Title:" label to
+    a fixed point; keep the first sentence; collapse whitespace; drop one
+    trailing period. No character filtering of any kind — every script and both
+    apostrophes (U+0027, U+2019) survive verbatim. May return "" (the caller's
+    existing "Motion detected" fallback owns empties).
+
+    Applies to LLM-generated titles only; caller-supplied titles (the
+    create_event action, the HTTP API) stay verbatim, and render safety is the
+    card's responsibility.
+    """
+    text = unicodedata.normalize("NFC", str(text)).strip()
+
+    for _ in range(10):  # bounded fixed point
+        changed = False
+        for opener, closer in _WRAP_PAIRS:
+            if (
+                len(text) >= len(opener) + len(closer)
+                and text.startswith(opener)
+                and text.endswith(closer)
+            ):
+                text = text[len(opener) : len(text) - len(closer)].strip()
+                changed = True
+                break
+        label = _LABEL_RE.match(text)
+        if label:
+            text = text[label.end() :].strip()
+            changed = True
+        if not changed:
+            break
+
+    text = _first_sentence(text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    # Drop one trailing "." or "。", but never an ellipsis ("…" / "...") and
+    # never "!"/"?"/"！"/"？".
+    if text and text[-1] in ".。" and not (len(text) >= 2 and text[-2] == "."):
+        text = text[:-1]
+
+    return text
 
 
 class Request:
@@ -236,9 +332,7 @@ class Request:
                         title_val = parsed.get("title")
                         desc_val = parsed.get("description")
                         if title_val is not None:
-                            result["title"] = re.sub(
-                                r"[^a-zA-Z0-9À-ÖØ-öø-ɏ\s]", "", str(title_val)
-                            )
+                            result["title"] = normalize_title(str(title_val))
                         if desc_val is not None:
                             result["response_text"] = str(desc_val)
                         return result
@@ -283,7 +377,7 @@ class Request:
 
         result = {}
         if gen_title is not None:
-            result["title"] = re.sub(r"[^a-zA-Z0-9À-ÖØ-öø-ɏ\s]", "", gen_title)
+            result["title"] = normalize_title(gen_title)
         result["response_text"] = response_text
 
         # Handle structured response if requested

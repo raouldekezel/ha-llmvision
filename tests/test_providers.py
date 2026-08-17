@@ -1423,8 +1423,27 @@ async def test_request_call_generate_title_and_fallback_coverage(
 
     result = await req.call(call_obj)
 
-    assert result["title"] == "Door Title"
+    assert result["title"] == "Door!* Title"  # no char filtering
     assert result["response_text"] == "ok text"
+
+
+@pytest.mark.anyio
+async def test_request_call_title_keeps_apostrophes_coverage(monkeypatch, coverage_hass):
+    """An apostrophe-bearing generated title survives call() verbatim."""
+    req = Request(coverage_hass, "m", 10, 0.2)
+    req.base64_images = ["aW1n"]
+    req.filenames = ["f.jpg"]
+
+    provider = DummyProvider(
+        response_text="ok text", title_text="Homme vu à l'allée", supports=False
+    )
+    monkeypatch.setattr(ProviderFactory, "create", lambda **kwargs: provider)
+
+    result = await req.call(
+        make_coverage_call(generate_title=True, response_format="text")
+    )
+
+    assert result["title"] == "Homme vu à l'allée"
 
 
 @pytest.mark.anyio
@@ -1502,7 +1521,7 @@ async def test_provider_coverage_misc_paths(monkeypatch, coverage_hass):
     call_obj = make_coverage_call()
     call_obj.model_is_glimpse = lambda: True
     result = await req.call(call_obj)
-    assert result["title"] == "A"
+    assert result["title"] == "A!"  # no char filtering
     assert result["response_text"] == "D"
 
     with pytest.raises(ServiceValidationError):
@@ -2074,7 +2093,7 @@ async def test_request_call_error_and_title_fallback_branches(
             provider="provider_groq", generate_title=True, response_format="text"
         )
     )
-    assert result["title"] == "Title2"
+    assert result["title"] == "Title#2"  # no char filtering
     assert result["response_text"] == "body2"
 
 
