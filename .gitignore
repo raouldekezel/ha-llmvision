@@ -15,8 +15,6 @@ htmlcov/
 *.py,cover
 coverage.xml
 *.log
-# Override: keep diagnostic-session log slices under docs/diag/.
-!docs/diag/**/*.llmvision.log
 
 # Virtual environments
 .venv/
