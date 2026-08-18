@@ -1,0 +1,31 @@
+2026-08-18 11:00:06.056 INFO (MainThread) [custom_components.llmvision] Response: {'response_text': 'closed_free'}
+2026-08-18 11:03:42.418 INFO (MainThread) [custom_components.llmvision.media_handlers] Recording camera_gate_profile1 for 3 seconds
+2026-08-18 11:03:42.423 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetching http://REDACTED-LAN-HOST:8123/api/camera_proxy/camera.camera_gate_profile1?token=REDACTED-TOKEN (attempt 1/2)
+2026-08-18 11:03:42.487 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetched camera.camera_gate_profile1 in 0.06 seconds
+2026-08-18 11:03:42.497 INFO (MainThread) [custom_components.llmvision.media_handlers] Preprocessing took: 0.01 seconds
+2026-08-18 11:03:42.497 INFO (MainThread) [custom_components.llmvision.media_handlers] First iteration took: 0.07 seconds, interval adjusted to: 1.926809310913086
+2026-08-18 11:03:44.425 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetching http://REDACTED-LAN-HOST:8123/api/camera_proxy/camera.camera_gate_profile1?token=REDACTED-TOKEN (attempt 1/2)
+2026-08-18 11:03:44.466 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetched camera.camera_gate_profile1 in 0.04 seconds
+2026-08-18 11:03:44.473 INFO (MainThread) [custom_components.llmvision.media_handlers] Preprocessing took: 0.01 seconds
+2026-08-18 11:03:46.465 INFO (SyncWorker_1) [custom_components.llmvision.media_handlers] [save_clip] clip: None, image: /media/llmvision/snapshots/7def0d82-camera0.jpg
+2026-08-18 11:03:48.047 INFO (MainThread) [custom_components.llmvision.media_handlers] Recording camera_parking_profile1 for 3 seconds
+2026-08-18 11:03:48.048 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetching http://REDACTED-LAN-HOST:8123/api/camera_proxy/camera.camera_parking_profile1?token=REDACTED-TOKEN (attempt 1/2)
+2026-08-18 11:03:48.170 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetched camera.camera_parking_profile1 in 0.12 seconds
+2026-08-18 11:03:48.176 INFO (MainThread) [custom_components.llmvision.media_handlers] Preprocessing took: 0.01 seconds
+2026-08-18 11:03:48.176 INFO (MainThread) [custom_components.llmvision.media_handlers] First iteration took: 0.13 seconds, interval adjusted to: 1.8722124099731445
+2026-08-18 11:03:50.049 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetching http://REDACTED-LAN-HOST:8123/api/camera_proxy/camera.camera_parking_profile1?token=REDACTED-TOKEN (attempt 1/2)
+2026-08-18 11:03:50.177 INFO (MainThread) [custom_components.llmvision.media_handlers] Fetched camera.camera_parking_profile1 in 0.13 seconds
+2026-08-18 11:03:50.194 INFO (MainThread) [custom_components.llmvision.media_handlers] Preprocessing took: 0.02 seconds
+2026-08-18 11:03:52.093 INFO (SyncWorker_4) [custom_components.llmvision.media_handlers] [save_clip] clip: None, image: /media/llmvision/snapshots/d1e6157a-camera0.jpg
+2026-08-18 11:03:58.822 INFO (MainThread) [custom_components.llmvision.timeline] Creating event: Event(uid=832395d3-1568-4a0d-9721-161b65b0dd83, title=Homme vu à l'allée, start=2026-08-18 11:03:42.418515+02:00, end=2026-08-18 11:04:58.820849+02:00, description=Un homme marche sur l'allée de la propriété, se déplaçant de droite à gauche et s'éloignant du portail. Le portail reste fermé. p=0.95, key_frame=/media/llmvision/snapshots/7def0d82-camera0.jpg, camera_name=camera.camera_gate_profile1, category=, label=)
+2026-08-18 11:03:58.824 INFO (MainThread) [custom_components.llmvision.timeline] Inserting event into database: Event(uid=832395d3-1568-4a0d-9721-161b65b0dd83, title=Homme vu à l'allée, start=2026-08-18 11:03:42.418515+02:00, end=2026-08-18 11:04:58.820849+02:00, description=Un homme marche sur l'allée de la propriété, se déplaçant de droite à gauche et s'éloignant du portail. Le portail reste fermé. p=0.95, key_frame=/media/llmvision/snapshots/7def0d82-camera0.jpg, camera_name=camera.camera_gate_profile1, category=, label=)
+2026-08-18 11:04:05.959 INFO (MainThread) [custom_components.llmvision.timeline] Creating event: Event(uid=099193ed-6551-4bf5-8f1e-30ed3be36cc4, title=Aucune anomalie, start=2026-08-18 11:03:48.046746+02:00, end=2026-08-18 11:05:05.957536+02:00, description=Rien d'inhabituel. (p=1.00), key_frame=/media/llmvision/snapshots/d1e6157a-camera0.jpg, camera_name=camera.camera_parking_profile1, category=, label=)
+2026-08-18 11:04:05.960 INFO (MainThread) [custom_components.llmvision.timeline] Inserting event into database: Event(uid=099193ed-6551-4bf5-8f1e-30ed3be36cc4, title=Aucune anomalie, start=2026-08-18 11:03:48.046746+02:00, end=2026-08-18 11:05:05.957536+02:00, description=Rien d'inhabituel. (p=1.00), key_frame=/media/llmvision/snapshots/d1e6157a-camera0.jpg, camera_name=camera.camera_parking_profile1, category=, label=)
+2026-08-18 11:05:19.566 ERROR (MainThread) [custom_components.llmvision.providers] Error: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+2026-08-18 11:05:19.566 ERROR (MainThread) [custom_components.llmvision.providers] Provider Google failed: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+2026-08-18 11:05:19.566 INFO (MainThread) [custom_components.llmvision.providers] Trying fallback provider: 01f7b387ec254b0c867aa160cd9096a7
+2026-08-18 11:05:22.013 INFO (MainThread) [custom_components.llmvision] Response: {'response_text': 'closed_free'}
+2026-08-18 11:05:50.841 ERROR (MainThread) [custom_components.llmvision.providers] Error: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+2026-08-18 11:05:50.841 ERROR (MainThread) [custom_components.llmvision.providers] Provider Google failed: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+2026-08-18 11:05:50.841 INFO (MainThread) [custom_components.llmvision.providers] Trying fallback provider: 01f7b387ec254b0c867aa160cd9096a7
+2026-08-18 11:05:52.548 INFO (MainThread) [custom_components.llmvision] Response: {'response_text': 'closed_free'}
