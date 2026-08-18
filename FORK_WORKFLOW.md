@@ -21,7 +21,8 @@ The process is the one proven on [NavimowHA](https://github.com/raouldekezel/Nav
 
 ### Issues
 
-- **Every change starts as an issue**, systematically — bug fix, feature, hardening, chore or investigation alike. Issues carry a typed identifier in the title, numbered per family and local to this repository: `BUG-NN`, `HARD-NN`, `FEAT-NN`, `CHORE-NN`, `SPIKE-NN`.
+- **Every change starts as an issue**, systematically — bug fix, feature, hardening, chore or investigation alike. Issues carry a typed identifier in the title, numbered per family and local to this repository: `BUG-NN`, `FEAT-NN`, `HARD-NN`, `CHORE-NN`, `SPIKE-NN`.
+- **Titles and problem statements take the user's perspective.** The title describes the problem as the user experiences it, in plain words — never the root cause, the mechanism, or the fix. The body opens the same way: a plain-words description of the symptoms from the user's point of view; root cause and internals come after, in their own sections. (Chores and spikes, which have no user-facing symptom, describe their goal instead.)
 - **The issue body is the normative source of truth.** Settled design, root cause, discarded alternatives and arbitrated decisions are folded into the body *in place*, with a dated edit trailer. Comments carry only dated session reports and reviews — never normative additions stacked over an outdated body.
 - **An issue is closed only by the operator, and only after on-site validation** on the live Home Assistant instance. A merge never closes an issue. If validation fails or reveals a new pathology, the issue reopens or a new `BUG` is filed (the BUG-17 → BUG-19 chain on NavimowHA is the canonical example).
 
