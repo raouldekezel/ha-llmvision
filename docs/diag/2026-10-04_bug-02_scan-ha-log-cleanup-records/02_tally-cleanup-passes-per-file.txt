@@ -1,0 +1,37 @@
+# Tally of [CLEANUP] records in 01_scan-ha-log-cleanup-records.llmvision.log (derived from it by 02_tally)
+# burst = consecutive records < 5 s apart; passes(file) = number of 'Removing' lines for that file in the burst
+
+burst start (CEST)         removing failed files files x1  x2  x3 x4+  consistent
+2026-10-01 19:22:32.256           4      0     4        4   0   0   0  yes
+2026-10-02 05:09:21.319           1      0     1        1   0   0   0  yes
+2026-10-02 09:20:25.831           5      0     5        5   0   0   0  yes
+2026-10-02 11:43:40.419          23     10    13        6   4   3   0  yes
+2026-10-02 12:24:37.703           8      0     8        8   0   0   0  yes
+2026-10-02 13:06:39.685           4      0     4        4   0   0   0  yes
+2026-10-02 16:00:00.503           8      0     8        8   0   0   0  yes
+2026-10-02 18:08:38.976          11      0    11       11   0   0   0  yes
+2026-10-02 18:40:51.895           2      0     2        2   0   0   0  yes
+2026-10-02 22:32:44.391           6      0     6        6   0   0   0  yes
+2026-10-02 23:14:29.950           4      0     4        4   0   0   0  yes
+2026-10-03 05:01:22.717           2      0     2        2   0   0   0  yes
+2026-10-03 08:28:33.557           1      0     1        1   0   0   0  yes
+2026-10-03 11:19:30.802           9      0     9        9   0   0   0  yes
+2026-10-03 11:48:25.862           2      0     2        2   0   0   0  yes
+2026-10-03 12:10:31.349           3      0     3        3   0   0   0  yes
+2026-10-03 12:52:44.211           2      0     2        2   0   0   0  yes
+2026-10-03 13:50:05.209          18      0    18       18   0   0   0  yes
+2026-10-03 15:05:19.685           9      0     9        9   0   0   0  yes
+2026-10-03 16:15:31.450           1      0     1        1   0   0   0  yes
+2026-10-03 16:26:35.859           1      0     1        1   0   0   0  yes
+2026-10-03 16:36:53.005           1      0     1        1   0   0   0  yes
+2026-10-03 17:05:09.715           1      0     1        1   0   0   0  yes
+2026-10-03 17:24:35.661           1      0     1        1   0   0   0  yes
+2026-10-03 17:37:37.998           1      0     1        1   0   0   0  yes
+2026-10-03 18:23:23.912           1      0     1        1   0   0   0  yes
+2026-10-03 18:32:12.725           4      2     2        1   0   1   0  yes
+2026-10-03 22:44:21.187           5      1     4        3   1   0   0  yes
+2026-10-04 09:42:13.036          29     16    13        1   8   4   0  yes
+2026-10-04 10:28:51.145           1      0     1        1   0   0   0  yes
+
+TOTAL: 30 bursts, 168 'Removing' lines, 29 'Failed to remove' warnings, 139 distinct files removed; multiplicity x1=118 x2=13 x3=8 x4+=0
+Consistency check (every failed file has failures == passes - 1, and no failure without a 'Removing' line): holds for every burst
