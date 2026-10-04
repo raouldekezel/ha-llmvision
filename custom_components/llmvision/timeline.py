@@ -14,6 +14,10 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
+# hass.data key of the lock shared by all Timeline instances, which work on the
+# same snapshots folder: cleanup passes and event creation never interleave.
+CLEANUP_LOCK_KEY = f"{DOMAIN}_cleanup_lock"
+
 DB_VERSION = 4
 
 
@@ -208,7 +212,7 @@ class Timeline:
 
         # Track key_frame paths whose DB rows are not yet committed
         self._pending_key_frames: set[str] = set()
-        self._cleanup_lock = asyncio.Lock()
+        self._cleanup_lock = hass.data.setdefault(CLEANUP_LOCK_KEY, asyncio.Lock())
         self._config_entry = config_entry
         self._migrating = True
 
@@ -1023,6 +1027,8 @@ class Timeline:
                 try:
                     await self.hass.async_add_executor_job(os.remove, file_path)
                     removed += 1
+                except FileNotFoundError:
+                    _LOGGER.debug(f"[CLEANUP] Already removed: {file_path}")
                 except OSError as e:
                     _LOGGER.warning(f"[CLEANUP] Failed to remove {file_path}: {e}")
 
